@@ -1,5 +1,5 @@
 /** util.js
- * 
+ *
  * A collection of global utility functions
  */
 
@@ -12,4 +12,9 @@ function getRandomInt(min, max) {
 // return the pixel value of a given grid position
 function posPix(dim, tileSize) {
     return dim * tileSize;
+}
+
+// return the grid value of a given pixel position
+function posGrid(dim, tileSize) {
+    return Math.floor(dim / tileSize);
 }

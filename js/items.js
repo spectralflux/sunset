@@ -21,3 +21,14 @@ var Weapon = function (rarity, cost, baseDamage) {
 };
 Weapon.prototype = Object.create(Item.prototype);
 Weapon.prototype.constructor = Weapon;
+
+
+/* AxeWeapon (subclass of Weapon)
+    Choppy chop chop */
+
+var AxeWeapon = function (rarity, cost, baseDamage) {
+    Weapon.call(this, rarity, cost);
+    this.baseDamage = baseDamage;
+};
+AxeWeapon.prototype = Object.create(Weapon.prototype);
+AxeWeapon.prototype.constructor = AxeWeapon;

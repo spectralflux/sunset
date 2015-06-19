@@ -1,5 +1,5 @@
 /** play-state.js
- * 
+ *
  * GameState while game is running.
  */
 
@@ -57,10 +57,10 @@ PlayState.create = function () {
 
     //if game is in debug mode, pump out some diagnostic text to screen.
     if (this.game.DEBUG_MODE) {
-	    this.myText1 = new Kiwi.HUD.Widget.TextField(this.game, 'Global Turn: 0', 50, 50);
-	    this.game.huds.defaultHUD.addWidget(this.myText1);
-	    this.myText1.style.color = '#00FF44';
-	}
+        this.myText1 = new Kiwi.HUD.Widget.TextField(this.game, 'Global Turn: 0', 50, 50);
+        this.game.huds.defaultHUD.addWidget(this.myText1);
+        this.myText1.style.color = '#00FF44';
+    }
 
     //initialize player
     this.player = new Player();
@@ -120,8 +120,31 @@ PlayState.checkForPlayerCollisionWithActors = function (playerXDir, playerYDir) 
     return isCollision;
 };
 
+//checking for collisions with map elements that 
+PlayState.checkForPlayerCollisionWithImpassibleMapTiles = function (playerXDir, playerYDir) {
+
+    //player hit map bounds
+    if (!this.isMoveInBounds(playerXDir, playerYDir)) {
+        return true;
+    }
+
+    if (this.level.isTileImpassible(posGrid(this.player.x, this.TILE_SIZE) + playerXDir, posGrid(this.player.y, this.TILE_SIZE) + playerYDir)) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+PlayState.isMoveInBounds = function (playerXDir, playerYDir) {
+    if ((posGrid(this.player.x, this.TILE_SIZE) + playerXDir < 0) || (posGrid(this.player.x, this.TILE_SIZE) + playerXDir > this.level.width) || (posGrid(this.player.y, this.TILE_SIZE) + playerYDir < 0) || (posGrid(this.player.y, this.TILE_SIZE) + playerYDir > this.level.height)) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
 PlayState.movePlayer = function (xdir, ydir) {
-    var isCollision = this.checkForPlayerCollisionWithActors(xdir, ydir);
+    var isCollision = this.checkForPlayerCollisionWithActors(xdir, ydir) || this.checkForPlayerCollisionWithImpassibleMapTiles(xdir, ydir);
     if (isCollision != true) {
         this.player.x = this.player.x + (xdir * this.TILE_SIZE);
         this.player.y = this.player.y + (ydir * this.TILE_SIZE);
