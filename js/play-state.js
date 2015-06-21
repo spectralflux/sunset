@@ -24,6 +24,11 @@ PlayState.isPlayersTurn;
 PlayState.player;
 PlayState.level;
 
+/* game log lines */
+PlayState.gameLogLine1;
+PlayState.gameLogLine2;
+PlayState.gameLogLine3;
+
 PlayState.preload = function () {
     this.addSpriteSheet('player', 'assets/player.png', 32, 32);
     this.addSpriteSheet('radsect', 'assets/radsect.png', 32, 32);
@@ -31,6 +36,8 @@ PlayState.preload = function () {
 };
 
 PlayState.create = function () {
+
+    this.game.stage.color = '111611';
 
     this.tilemap = new Kiwi.GameObjects.Tilemap.TileMap(this);
     /**
@@ -54,13 +61,6 @@ PlayState.create = function () {
 
     //Add the Layer to the State to be Rendered.
     this.addChild(this.tilemap.layers[0]);
-
-    //if game is in debug mode, pump out some diagnostic text to screen.
-    if (this.game.DEBUG_MODE) {
-        this.myText1 = new Kiwi.HUD.Widget.TextField(this.game, 'Global Turn: 0', 50, 50);
-        this.game.huds.defaultHUD.addWidget(this.myText1);
-        this.myText1.style.color = '#00FF44';
-    }
 
     //initialize player
     this.player = new Player();
@@ -97,7 +97,40 @@ PlayState.create = function () {
     this.isPlayersTurn = true;
     this.waitCounter = 0;
 
+    //start a new game log
+    this.gameLog = new GameLog(this.game.DEBUG_MODE);
+    this.initGameLog();
+
+    //Console text
+    this.consoleTitles = new Kiwi.HUD.Widget.TextField(this.game, 'SUNSET: APOCALYPSE SIMULATOR v0.0 >>>', 50, 660);
+    this.game.huds.defaultHUD.addWidget(this.consoleTitles);
+    this.consoleTitles.style.color = '#00FF44';
+    this.consoleTitles.style.fontFamily = 'Geo';
+
 };
+
+PlayState.initGameLog = function () {
+
+    //TODO: D.R.Y!
+
+    // game log print outs
+    this.gameLogLine1 = new Kiwi.HUD.Widget.TextField(this.game, 'log line 1', 50, 690);
+    this.game.huds.defaultHUD.addWidget(this.gameLogLine1);
+    this.gameLogLine1.style.color = '#00FF44';
+    this.gameLogLine1.style.fontFamily = 'Geo';
+
+    // game log print outs
+    this.gameLogLine2 = new Kiwi.HUD.Widget.TextField(this.game, 'log line 2', 50, 720);
+    this.game.huds.defaultHUD.addWidget(this.gameLogLine2);
+    this.gameLogLine2.style.color = '#00FF44';
+    this.gameLogLine2.style.fontFamily = 'Geo';
+
+    // game log print outs
+    this.gameLogLine2 = new Kiwi.HUD.Widget.TextField(this.game, 'log line 3', 50, 750);
+    this.game.huds.defaultHUD.addWidget(this.gameLogLine2);
+    this.gameLogLine2.style.color = '#00FF44';
+    this.gameLogLine2.style.fontFamily = 'Geo';
+}
 
 //Specifically check whether a player move would "run over" an actor, to determine whether the player initiates a melee attack.
 PlayState.checkForPlayerCollisionWithActors = function (playerXDir, playerYDir) {
@@ -110,9 +143,10 @@ PlayState.checkForPlayerCollisionWithActors = function (playerXDir, playerYDir) 
                 ((this.level.actors[i].y === this.player.y + oneSquare) && (playerYDir === this.DOWN_DIR))))) {
             this.level.actors[i].takeDamage(this.player.dmg);
             isCollision = true;
-            console.log("DMG: player damages actor, actor has " + this.level.actors[i].hp + " HP remaining.");
+
+            this.gameLog.log("DMG: player damages actor, actor has " + this.level.actors[i].hp + " HP remaining.", this.gameLog.TYPE.DEBUG);
             if (this.level.actors[i].isDead()) {
-                console.log("Actor dead.");
+                this.gameLog.log("Actor dead.", this.gameLog.TYPE.DEBUG);
                 this.killActor(this.level.actors[i]);
             }
         }
@@ -150,7 +184,11 @@ PlayState.movePlayer = function (xdir, ydir) {
         this.player.y = this.player.y + (ydir * this.TILE_SIZE);
     }
     this.globalTurn++;
-    this.myText1.text = "Global Turn: " + this.globalTurn;
+
+    if (this.game.DEBUG_MODE) {
+        this.gameLog.log("Global Turn: " + this.globalTurn, this.gameLog.TYPE.DEBUG);
+    }
+
     this.isPlayersTurn = false;
     this.waitCounter = this.WAIT_TIME;
 };
@@ -172,6 +210,17 @@ PlayState.doEnemyTurn = function () {
     this.moveActors();
     this.isPlayersTurn = true;
 };
+
+PlayState.updateGameLog = function () {
+
+    //TODO implement
+
+    /*    if (this.gameLog.buffer.length < 3) {
+
+
+            this.gameLog.buffer.slice(Math.max(this.gameLog.buffer.length - 3, 1))*/
+
+}
 
 PlayState.update = function () {
 
@@ -209,5 +258,7 @@ PlayState.update = function () {
         this.level.actors[i].sprite.x = this.level.actors[i].x;
         this.level.actors[i].sprite.y = this.level.actors[i].y;
     }
+
+    this.updateGameLog();
 
 };
