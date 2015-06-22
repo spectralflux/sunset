@@ -16,6 +16,7 @@ PlayState.LEFT_DIR = -1;
 PlayState.RIGHT_DIR = 1;
 PlayState.NO_MOVE_DIR = 0;
 PlayState.WAIT_TIME = 10;
+PlayState.NUM_GAME_LOG_LINES = 6;
 
 /* PlayState scope variables */
 PlayState.waitCounter;
@@ -25,21 +26,19 @@ PlayState.player;
 PlayState.level;
 
 /* game log lines */
-PlayState.gameLogLine1;
-PlayState.gameLogLine2;
-PlayState.gameLogLine3;
+PlayState.gameLogLines;
 
 PlayState.preload = function () {
     this.addSpriteSheet('player', 'assets/player.png', 32, 32);
     this.addSpriteSheet('radsect', 'assets/radsect.png', 32, 32);
+    this.addSpriteSheet('greensplat', 'assets/green-splat.png', 32, 32);
     this.addSpriteSheet('tiles', 'assets/floormap.png', 32, 32);
 };
 
 PlayState.create = function () {
-
     this.game.stage.color = '111611';
-
     this.tilemap = new Kiwi.GameObjects.Tilemap.TileMap(this);
+
     /**
      * Param 1 - Width of a single tile.
      * Param 2 - Height of a single tile.
@@ -98,38 +97,28 @@ PlayState.create = function () {
     this.waitCounter = 0;
 
     //start a new game log
-    this.gameLog = new GameLog(this.game.DEBUG_MODE);
+    this.gameLog = new GameLog(this.game.DEBUG_MODE, this.NUM_GAME_LOG_LINES);
     this.initGameLog();
 
     //Console text
     this.consoleTitles = new Kiwi.HUD.Widget.TextField(this.game, 'SUNSET: APOCALYPSE SIMULATOR v0.0 >>>', 50, 660);
     this.game.huds.defaultHUD.addWidget(this.consoleTitles);
-    this.consoleTitles.style.color = '#00FF44';
+    this.consoleTitles.style.color = '#55EE11';
     this.consoleTitles.style.fontFamily = 'Geo';
-
 };
 
 PlayState.initGameLog = function () {
+    var i;
+    var logBaseHeight = 690;
+    var lineWidth = 30;
 
-    //TODO: D.R.Y!
-
-    // game log print outs
-    this.gameLogLine1 = new Kiwi.HUD.Widget.TextField(this.game, 'log line 1', 50, 690);
-    this.game.huds.defaultHUD.addWidget(this.gameLogLine1);
-    this.gameLogLine1.style.color = '#00FF44';
-    this.gameLogLine1.style.fontFamily = 'Geo';
-
-    // game log print outs
-    this.gameLogLine2 = new Kiwi.HUD.Widget.TextField(this.game, 'log line 2', 50, 720);
-    this.game.huds.defaultHUD.addWidget(this.gameLogLine2);
-    this.gameLogLine2.style.color = '#00FF44';
-    this.gameLogLine2.style.fontFamily = 'Geo';
-
-    // game log print outs
-    this.gameLogLine2 = new Kiwi.HUD.Widget.TextField(this.game, 'log line 3', 50, 750);
-    this.game.huds.defaultHUD.addWidget(this.gameLogLine2);
-    this.gameLogLine2.style.color = '#00FF44';
-    this.gameLogLine2.style.fontFamily = 'Geo';
+    this.gameLogLines = [];
+    for (i = 0; i < PlayState.NUM_GAME_LOG_LINES; i++) {
+        this.gameLogLines[i] = new Kiwi.HUD.Widget.TextField(this.game, '', 50, logBaseHeight + i * lineWidth);
+        this.game.huds.defaultHUD.addWidget(this.gameLogLines[i]);
+        this.gameLogLines[i].style.color = '#00FF44';
+        this.gameLogLines[i].style.fontFamily = 'Geo';
+    }
 }
 
 //Specifically check whether a player move would "run over" an actor, to determine whether the player initiates a melee attack.
@@ -156,7 +145,6 @@ PlayState.checkForPlayerCollisionWithActors = function (playerXDir, playerYDir) 
 
 //checking for collisions with map elements that 
 PlayState.checkForPlayerCollisionWithImpassibleMapTiles = function (playerXDir, playerYDir) {
-
     //player hit map bounds
     if (!this.isMoveInBounds(playerXDir, playerYDir)) {
         return true;
@@ -179,6 +167,7 @@ PlayState.isMoveInBounds = function (playerXDir, playerYDir) {
 
 PlayState.movePlayer = function (xdir, ydir) {
     var isCollision = this.checkForPlayerCollisionWithActors(xdir, ydir) || this.checkForPlayerCollisionWithImpassibleMapTiles(xdir, ydir);
+
     if (isCollision != true) {
         this.player.x = this.player.x + (xdir * this.TILE_SIZE);
         this.player.y = this.player.y + (ydir * this.TILE_SIZE);
@@ -204,6 +193,8 @@ PlayState.moveActors = function () {
 PlayState.killActor = function (actor) {
     actor.sprite.destroy();
     this.level.actors.splice(this.level.actors.indexOf(actor), 1);
+    var newSplat = new Kiwi.GameObjects.Sprite(this, this.textures.greensplat, actor.x, actor.y);
+    this.addChild(newSplat);
 };
 
 PlayState.doEnemyTurn = function () {
@@ -212,14 +203,12 @@ PlayState.doEnemyTurn = function () {
 };
 
 PlayState.updateGameLog = function () {
+    var gameLogEntries = this.gameLog.tail(PlayState.NUM_GAME_LOG_LINES);
+    var i;
 
-    //TODO implement
-
-    /*    if (this.gameLog.buffer.length < 3) {
-
-
-            this.gameLog.buffer.slice(Math.max(this.gameLog.buffer.length - 3, 1))*/
-
+    for (i = 0; i < gameLogEntries.length; i++) {
+        this.gameLogLines[i].text = gameLogEntries[gameLogEntries.length - 1 - i].message;
+    }
 }
 
 PlayState.update = function () {

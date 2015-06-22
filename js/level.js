@@ -35,14 +35,20 @@ Level.prototype.init = function () {
     // build map
     var tilemapdata = new Array(this.worldSize);
     var i;
+    var rnd;
     for (i = 0; i < this.worldSize; i++) {
-        tilemapdata[i] = getRandomInt(1, 3);
+        rnd = Math.random();
+        if (rnd > 0.8) {
+            tilemapdata[i] = 2;
+        } else {
+            tilemapdata[i] = 1;
+        }
     };
     this.tilemapdata = tilemapdata;
 
     //populate actors a bit
     this.actors = new Array();
-    for (i = 0; i < 4; i++) {
+    for (i = 0; i < 8; i++) {
         this.actors.push(new Radsect(1, posPix(getRandomInt(2, 20), this.tileSize), posPix(getRandomInt(2, 20), this.tileSize)));
     }
 };
