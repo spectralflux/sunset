@@ -1,7 +1,7 @@
 /** actors.js
  *
  * An object heirachy of non-player actors in the game.
-*/
+ */
 
 /* Actor
     The base object for the heirarchy. */
@@ -13,6 +13,7 @@ var Actor = function (hp, meleeDmg, isHostile, x, y) {
     this.x = x;
     this.y = y;
     this.sprite = null;
+    this.deathSprite = null;
 };
 
 // Death might be more than just 0 HP, so make this a function to check.
@@ -40,7 +41,7 @@ MeleeEnemy.prototype = Object.create(Actor.prototype);
 MeleeEnemy.prototype.constructor = MeleeEnemy;
 
 
-/* Radsect (subclass of Actor)
+/* Radsect (subclass of MeleeEnemy)
     Irradiated scorpion monster. */
 
 var Radsect = function (meleeDmg, x, y) {
@@ -48,3 +49,13 @@ var Radsect = function (meleeDmg, x, y) {
 };
 Radsect.prototype = Object.create(MeleeEnemy.prototype);
 Radsect.prototype.constructor = Radsect;
+
+
+/* Cansquid (subclass of MeleeEnemy)
+    Robosquid monster. */
+
+var Cansquid = function (meleeDmg, x, y) {
+    MeleeEnemy.call(this, 50, meleeDmg, x, y);
+};
+Cansquid.prototype = Object.create(MeleeEnemy.prototype);
+Cansquid.prototype.constructor = Cansquid;

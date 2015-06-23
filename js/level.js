@@ -13,7 +13,10 @@ var Level = function (width, height, worldSize, tileSize) {
     this.tilemapdata = null;
 
     // all the actors on the map
-    this.actors = null;
+    this.actors = [];
+
+    // all interactable elements on map
+    this.interactables = [];
 };
 
 Level.prototype.tileListing = [{
@@ -47,10 +50,16 @@ Level.prototype.init = function () {
     this.tilemapdata = tilemapdata;
 
     //populate actors a bit
-    this.actors = new Array();
     for (i = 0; i < 8; i++) {
         this.actors.push(new Radsect(1, posPix(getRandomInt(2, 20), this.tileSize), posPix(getRandomInt(2, 20), this.tileSize)));
     }
+    for (i = 0; i < 4; i++) {
+        this.actors.push(new Cansquid(1, posPix(getRandomInt(2, 20), this.tileSize), posPix(getRandomInt(2, 20), this.tileSize)));
+    }
+
+    // add some stairs up and down
+    this.interactables.push(new StairsUp(posPix(getRandomInt(2, 20), this.tileSize), posPix(getRandomInt(2, 20), this.tileSize)));
+    this.interactables.push(new StairsDown(posPix(getRandomInt(2, 20), this.tileSize), posPix(getRandomInt(2, 20), this.tileSize)));
 };
 
 // gets the array entry in tilemapdata from a grid x,y location

@@ -31,7 +31,11 @@ PlayState.gameLogLines;
 PlayState.preload = function () {
     this.addSpriteSheet('player', 'assets/player.png', 32, 32);
     this.addSpriteSheet('radsect', 'assets/radsect.png', 32, 32);
-    this.addSpriteSheet('greensplat', 'assets/green-splat.png', 32, 32);
+    this.addSpriteSheet('cansquid', 'assets/cansquid.png', 32, 32);
+    this.addSpriteSheet('greensplat', 'assets/greensplat.png', 32, 32);
+    this.addSpriteSheet('oilsplat', 'assets/oilsplat.png', 32, 32);
+    this.addSpriteSheet('stairsup', 'assets/stairsup.png', 32, 32);
+    this.addSpriteSheet('stairsdown', 'assets/stairsdown.png', 32, 32);
     this.addSpriteSheet('tiles', 'assets/floormap.png', 32, 32);
 };
 
@@ -61,23 +65,40 @@ PlayState.create = function () {
     //Add the Layer to the State to be Rendered.
     this.addChild(this.tilemap.layers[0]);
 
+    //initialize actor sprites
+    for (var i = 0; i < this.level.actors.length; i++) {
+        if (this.level.actors[i] instanceof Radsect) {
+            this.level.actors[i].sprite = new Kiwi.GameObjects.Sprite(this, this.textures.radsect, this.level.actors[i].x, this.level.actors[i].y)
+            this.level.actors[i].deathSprite = this.textures.greensplat;
+            this.addChild(this.level.actors[i].sprite);
+        }
+        if (this.level.actors[i] instanceof Cansquid) {
+            this.level.actors[i].sprite = new Kiwi.GameObjects.Sprite(this, this.textures.cansquid, this.level.actors[i].x, this.level.actors[i].y)
+            this.level.actors[i].deathSprite = this.textures.oilsplat;
+            this.addChild(this.level.actors[i].sprite);
+        }
+    }
+
+    //intialize interactables sprites
+    for (var i = 0; i < this.level.interactables.length; i++) {
+        if (this.level.interactables[i] instanceof StairsUp) {
+            this.level.interactables[i].sprite = new Kiwi.GameObjects.Sprite(this, this.textures.stairsup, this.level.interactables[i].x, this.level.interactables[i].y)
+            this.addChild(this.level.interactables[i].sprite);
+        }
+        if (this.level.interactables[i] instanceof StairsDown) {
+            this.level.interactables[i].sprite = new Kiwi.GameObjects.Sprite(this, this.textures.stairsdown, this.level.interactables[i].x, this.level.interactables[i].y)
+            this.addChild(this.level.interactables[i].sprite);
+        }
+    }
+
     //initialize player
     this.player = new Player();
     this.player.sprite = new Kiwi.GameObjects.Sprite(this, this.textures.player, 0, 0);
     this.addChild(this.player.sprite);
 
-    //initialize actor sprites
-    for (var i = 0; i < this.level.actors.length; i++) {
-        if (this.level.actors[i] instanceof Radsect) {
-            this.level.actors[i].sprite = new Kiwi.GameObjects.Sprite(this, this.textures.radsect, this.level.actors[i].x, this.level.actors[i].y)
-            this.addChild(this.level.actors[i].sprite);
-        }
-    }
-
     var myKeyboard = this.game.input.keyboard;
     myKeyboard.justPressedRate = 5000;
     this.keyboard = myKeyboard;
-
 
     // Creating Keys
     this.rightKey = this.keyboard.addKey(Kiwi.Input.Keycodes.D);
@@ -193,7 +214,7 @@ PlayState.moveActors = function () {
 PlayState.killActor = function (actor) {
     actor.sprite.destroy();
     this.level.actors.splice(this.level.actors.indexOf(actor), 1);
-    var newSplat = new Kiwi.GameObjects.Sprite(this, this.textures.greensplat, actor.x, actor.y);
+    var newSplat = new Kiwi.GameObjects.Sprite(this, actor.deathSprite, actor.x, actor.y);
     this.addChild(newSplat);
 };
 
@@ -207,7 +228,8 @@ PlayState.updateGameLog = function () {
     var i;
 
     for (i = 0; i < gameLogEntries.length; i++) {
-        this.gameLogLines[i].text = gameLogEntries[gameLogEntries.length - 1 - i].message;
+        //this.gameLogLines[i].text = gameLogEntries[gameLogEntries.length - 1 - i].message;
+        this.gameLogLines[i].text = gameLogEntries[i].message;
     }
 }
 
