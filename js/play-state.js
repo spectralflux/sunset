@@ -203,13 +203,6 @@ PlayState.movePlayer = function (xdir, ydir) {
     this.waitCounter = this.WAIT_TIME;
 };
 
-PlayState.moveActors = function () {
-    /* for (var i = 0; i < this.level.actors.length; i++) {
-     this.level.actors[i].x = this.level.actors[i].x + posPix(getRandomInt(-1, 1), PlayState.TILE_SIZE);
-     this.level.actors[i].y = this.level.actors[i].y + posPix(getRandomInt(-1, 1), PlayState.TILE_SIZE);
- }*/
-};
-
 // remove an actor from the actors list and destroy sprite.
 PlayState.killActor = function (actor) {
     actor.sprite.destroy();
@@ -219,9 +212,61 @@ PlayState.killActor = function (actor) {
 };
 
 PlayState.doEnemyTurn = function () {
-    this.moveActors();
+    var rnd;
+
+    for (var i in this.level.actors) {
+        //set actor state if player is seen and actor isn't inert
+        if (this.checkActorLOS(i) && this.level.actors[i].currentState !== this.level.actors[i].STATE.INERT) {
+            this.level.actors[i].currentState = this.level.actors[i].STATE.ALERT_TO_PLAYER
+        }
+
+        //do action based on state
+        switch (this.level.actors[i].currentState) {
+        case this.level.actors[i].STATE.ALERT_TO_PLAYER:
+            this.moveActorTowardsPlayer(i);
+            break;
+        case this.level.actors[i].STATE.ROAMING:
+            rnd = Math.random();
+
+            if (rnd > 0.7) {
+                this.level.actors[i].x = this.level.actors[i].x + posPix(getRandomInt(-1, 1) * this.level.actors[i].moveSpeed, PlayState.TILE_SIZE);
+                this.level.actors[i].y = this.level.actors[i].y + posPix(getRandomInt(-1, 1) * this.level.actors[i].moveSpeed, PlayState.TILE_SIZE);
+            }
+            break;
+        }
+    }
+    //actors turns finished, now player's turn
     this.isPlayersTurn = true;
 };
+
+PlayState.moveActorTowardsPlayer = function (actorIndex) {
+    var rnd = Math.random();
+
+    if (this.level.actors[actorIndex].x === this.player.x && this.level.actors[actorIndex].y === this.player.y) {
+        // this shouldn't be possible
+    } else if (this.level.actors[actorIndex].x === this.player.x) {
+        this.level.actors[actorIndex].y = this.level.actors[actorIndex].y + posPix(getCardinality(this.player.y, this.level.actors[actorIndex].y) * this.level.actors[actorIndex].moveSpeed, PlayState.TILE_SIZE);
+    } else if (this.level.actors[actorIndex].y === this.player.y) {
+        this.level.actors[actorIndex].x = this.level.actors[actorIndex].x + posPix(getCardinality(this.player.x, this.level.actors[actorIndex].x) * this.level.actors[actorIndex].moveSpeed, PlayState.TILE_SIZE);
+    } else {
+        // move a random dimension towards player
+        if (rnd > 0.5) {
+            this.level.actors[actorIndex].x = this.level.actors[actorIndex].x + posPix(getCardinality(this.player.x, this.level.actors[actorIndex].x) * this.level.actors[actorIndex].moveSpeed, PlayState.TILE_SIZE);
+        } else {
+            this.level.actors[actorIndex].y = this.level.actors[actorIndex].y + posPix(getCardinality(this.player.y, this.level.actors[actorIndex].y) * this.level.actors[actorIndex].moveSpeed, PlayState.TILE_SIZE);
+        }
+    }
+}
+
+PlayState.checkActorLOS = function (actorIndex) {
+    //TODO then check if impassible terrain is in the way
+    if ((posGrid(Math.abs(this.level.actors[actorIndex].x - this.player.x), PlayState.TILE_SIZE) <= this.level.actors[actorIndex].sightradius) &&
+        (posGrid(Math.abs(this.level.actors[actorIndex].y - this.player.y), PlayState.TILE_SIZE) <= this.level.actors[actorIndex].sightradius)) {
+        return true;
+    } else {
+        return false;
+    }
+}
 
 PlayState.updateGameLog = function () {
     var gameLogEntries = this.gameLog.tail(PlayState.NUM_GAME_LOG_LINES);

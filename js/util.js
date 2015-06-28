@@ -18,3 +18,20 @@ function posPix(dim, tileSize) {
 function posGrid(dim, tileSize) {
     return Math.floor(dim / tileSize);
 }
+
+// return +1 if a > b, else return -1 if a < b, if a === b return 0.
+function getCardinality(a, b) {
+    if (a > b) {
+        return 1;
+    } else if (a < b) {
+        return -1;
+    } else {
+        return 0;
+    }
+}
+
+// return if two objects are adjacent to each other (not including diagonally adjacent
+function isAdjacent(x1, y1, x2, y2, tileSize) {
+    //TODO complete this
+    return false;
+}

@@ -14,7 +14,23 @@ var Actor = function (hp, meleeDmg, isHostile, x, y) {
     this.y = y;
     this.sprite = null;
     this.deathSprite = null;
+
+    //how many squares the actor can see
+    this.sightradius = null;
+
+    //current state of actor
+    this.currentState = this.STATE.INERT;
+
+    //TODO set movespeed for all actors to 1 grid square for now
+    this.moveSpeed = 1;
 };
+
+Actor.prototype.STATE = {
+    INERT: 0,
+    ROAMING: 1,
+    ALERT_TO_PLAYER: 2
+};
+
 
 // Death might be more than just 0 HP, so make this a function to check.
 Actor.prototype.isDead = function () {
@@ -28,6 +44,17 @@ Actor.prototype.isDead = function () {
 
 Actor.prototype.takeDamage = function (dmg) {
     this.hp = this.hp - dmg;
+};
+
+Actor.prototype.meleeAttack = function (playerObj) {
+    playerObj.takeDamage(this.meleeDmg);
+};
+
+// do actor turn actions
+Actor.prototype.doAITurn = function (playerX, playerY) {
+
+    console.log("actor turn");
+
 };
 
 
@@ -46,6 +73,8 @@ MeleeEnemy.prototype.constructor = MeleeEnemy;
 
 var Radsect = function (meleeDmg, x, y) {
     MeleeEnemy.call(this, 20, meleeDmg, x, y);
+    this.sightradius = 2;
+    this.currentState = this.STATE.ROAMING;
 };
 Radsect.prototype = Object.create(MeleeEnemy.prototype);
 Radsect.prototype.constructor = Radsect;
@@ -56,6 +85,8 @@ Radsect.prototype.constructor = Radsect;
 
 var Cansquid = function (meleeDmg, x, y) {
     MeleeEnemy.call(this, 50, meleeDmg, x, y);
+    this.sightradius = 4;
+    this.currentState = this.STATE.ROAMING;
 };
 Cansquid.prototype = Object.create(MeleeEnemy.prototype);
 Cansquid.prototype.constructor = Cansquid;
